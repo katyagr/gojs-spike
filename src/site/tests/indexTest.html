@@ -1,0 +1,115 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>GoJS Tests</title>
+  <!-- Copyright 1998-2024 by Northwoods Software Corporation. All Rights Reserved. -->
+  <!-- <script src="go.js"></script> -->
+
+  <!--<script src="../release/go-debug.js"></script>-->
+
+
+  <script src="../../out/go-dev.js"></script>
+  <script src="../extensions/Figures.js"></script>
+
+  <!-- This file defines the test framework: -->
+  <script src="gotest.js"></script>
+
+  <!-- These files reference any extensions that are used in tests -->
+  <script src="../extensions/TableLayout.js"></script>
+  <script src="../extensions/GeometryReshapingTool.js"></script>
+  <script src="../extensions/AvoidsLinksRouter.js"></script>
+
+  <!-- just one test file, for development purposes only -->
+  <script src="invalidation.js"></script>
+  <!-- <script src="theme.js"></script> -->
+
+  <script>
+    function withDebug(option) {
+      if (go.SavedDebug === undefined && go.Diagram) {
+        go.SavedDebug = go.Debug;
+      }
+      if (option == 'yes') {
+        go.Debug = (go.SavedDebug ? go.SavedDebug : {});
+      } else if (option == 'stub') {
+        go.Debug = {};
+      } else if (option == 'no') {
+        go.Debug = null;
+      }
+    }
+
+    function onRunSlowTests() {
+      TestCollection.RunSlowTests = !TestCollection.RunSlowTests;
+      updateControls();
+    }
+
+    function onLogTestName() {
+      TestCollection.LogTestName = !TestCollection.LogTestName;
+      updateControls();
+    }
+
+    function onAlerts() {
+      TestCollection.Alerts = !TestCollection.Alerts;
+      updateControls();
+    }
+
+    function onCatch() {
+      TestCollection.Catch = !TestCollection.Catch;
+      updateControls();
+    }
+
+    function updateControls() {
+      if (go.Debug === null) {
+        document.getElementById("debugNo").checked = "checked";
+      } else if (typeof go.Debug === 'object' && typeof go.Debug.trace === 'function') {
+        document.getElementById("debugYes").checked = "checked";
+      } else {
+        document.getElementById("debugStub").checked = "checked";
+      }
+      var s = document.getElementById("checkBoxRunSlowTests");
+      if (s) {
+        s.checked = (TestCollection.RunSlowTests ? "checked" : "");
+      }
+      var t = document.getElementById("checkBoxLogTestName");
+      if (t) {
+        t.checked = (TestCollection.LogTestName ? "checked" : "");
+      }
+      var a = document.getElementById("checkBoxAlerts");
+      if (a) {
+        a.checked = (TestCollection.Alerts ? "checked" : "");
+      }
+      var c = document.getElementById("checkBoxCatch");
+      if (c) {
+        c.checked = (TestCollection.Catch ? "checked" : "");
+      }
+
+      TestCollection.setStatus(go.version || 'unknown version');
+    }
+  </script>
+</head>
+
+<body onload="initTree();updateControls();">
+  <div id="myDiagram" style="border: solid 1px blue; position: absolute; left: 0%; width:69%; top: 0%; height:90%">
+  </div>
+  <div id="myTestTree" style="border: solid 1px green; position: absolute; left: 70%; width:29%; top: 0%; height:90%">
+  </div>
+  <div style="position:absolute; top:91%">
+    <div style="position:static">
+      <input type="button" onclick="TestCollection.runAll()" value="Run All" />
+      Debug:
+      <input type="radio" name="debug" id="debugYes" onclick="withDebug('yes')" checked="checked" />yes
+      <input type="radio" name="debug" id="debugStub" onclick="withDebug('stub')" />stub
+      <input type="radio" name="debug" id="debugNo" onclick="withDebug('no')" />no
+      <input type="checkbox" id="checkBoxRunSlowTests" onclick="onRunSlowTests()" />Slow Tests
+      <input type="checkbox" id="checkBoxLogTestName" onclick="onLogTestName()" />Log Name
+      <input type="checkbox" id="checkBoxAlerts" onclick="onAlerts()" />Alerts
+      <input type="checkbox" id="checkBoxCatch" onclick="onCatch()" />Catch Errors
+      <input type="button" onclick="collapseTree(3)" value="Only 3 Levels" />
+      <br />
+      <div id="myStatus">(status)</div>
+    </div>
+  </div>
+</body>
+
+</html>

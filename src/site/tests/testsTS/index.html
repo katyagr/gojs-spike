@@ -1,0 +1,84 @@
+<!doctype html>
+<html>
+
+<head>
+  <title>GoJS Tests TS</title>
+  <!-- Copyright 1998-2024 by Northwoods Software Corporation. All Rights Reserved. -->
+  <script type="importmap">{"imports":{"gojs":"../../release/go-module.js"}}</script>
+</head>
+
+<body>
+  <div id="myDiagram" style="border: solid 1px blue; position: absolute; left: 0%; width:69%; top: 0%; height:90%">
+  </div>
+  <div style="position:absolute; left:70%; top:0%; width:29%; height:90%">
+    <input type="button" id="myRunAllButton" value="Run All Tests" />
+    <button id="myCollapseButton">Collapse</button>
+    <br>
+    <input type="text" id="search" value="TestRoot" />
+    <input type="button" id="mySearchButton" value="search tree" />
+    <div id="myTestStatus">(status)</div>
+    <div id="myTestTree" style="border: solid 1px green; height:90%"></div>
+  </div>
+
+  <script type="module">
+    import * as go from "gojs";
+    import { Test, TestCollection, TestRoot, initTree } from "./gotest.js";
+    import "../../extensionsJSM/Figures.js";
+
+    // ADD TEST FILES HERE
+    import "./namespace.js";
+    import "./panelTS.js";
+    import "./packedTests.js";
+    import "./quadtreeTests.js";
+
+
+    // set up the tree of tests
+    var myTreeDiagram = initTree('myTestTree', 'myTestStatus');
+    myTreeDiagram.commit(d => d.findTreeRoots().each(n => n.collapseTree(2)));
+
+
+    // finds a given test collection of a collection anywhere in the tree given the name and the root
+    function find(name, coll) {
+      if (!coll) return null;
+      if (coll.name.toLowerCase().indexOf(name) >= 0) return coll;
+      if (coll instanceof TestCollection) {
+        let it = coll.tests.iterator;
+        while (it.next()) {
+          const t = find(name, it.value);
+          if (t !== null) return t;
+        }
+        it = coll.collections.iterator;
+        while (it.next()) {
+          const tc = find(name, it.value);
+          if (tc !== null) return tc;
+        }
+      }
+      return null;
+    }
+
+    function search() {
+      const search = document.getElementById("search").value.trim().toLowerCase();
+      if (!search) return;
+      const test = find(search, TestRoot);
+      if (test) {
+        const node = myTreeDiagram.findNodeForData(test);
+        if (node) {
+          myTreeDiagram.select(node);
+          myTreeDiagram.commandHandler.scrollToPart(node);
+        }
+      }
+    }
+
+    // setup buttons
+    document.getElementById("myRunAllButton").addEventListener("click", () => TestCollection.runAll());
+    document.getElementById("search").addEventListener("input", () => search());
+    document.getElementById("mySearchButton").addEventListener("click", () => search());
+    document.getElementById("myCollapseButton").addEventListener("click", () => {
+      myTreeDiagram.commit(d => d.findTreeRoots().each(n => n.collapseTree(2)));
+    });
+
+    TestCollection.setStatus(go.version ? "v" + go.version : 'unknown version');
+  </script>
+</body>
+
+</html>
