@@ -27,7 +27,7 @@ const tjunction = new go.Node("Vertical")
         new go.TextBlock({ name: "label" })
           .bind("text"),
       ),
-    new go.Shape({ width: 20, height: 20, figure: "diamond" })
+    new go.Shape({ width: 20, height: 20, figure: "diamond", portId: "" })
   )
 
 
